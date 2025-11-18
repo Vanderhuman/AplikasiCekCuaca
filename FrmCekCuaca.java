@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -112,13 +114,10 @@ public class FrmCekCuaca extends javax.swing.JFrame {
 
         tblData.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Kota", "Suhu", "Kondisi"
             }
         ));
         jScrollPane2.setViewportView(tblData);
@@ -239,6 +238,13 @@ public class FrmCekCuaca extends javax.swing.JFrame {
     if (cuaca != null) {
         lblHasil.setText("Suhu: " + cuaca.getSuhu() + "°C, Kondisi: " + cuaca.getKondisi());
         tampilkanIconCuaca(cuaca.getKondisi());
+        DefaultTableModel model = (DefaultTableModel) tblData.getModel();
+    model.addRow(new Object[]{
+    cuaca.getKota(),
+    cuaca.getSuhu(),
+    cuaca.getKondisi()
+});
+
     }        // TODO add your handling code here:
     }//GEN-LAST:event_btnCekActionPerformed
 
@@ -248,34 +254,93 @@ public class FrmCekCuaca extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSimpanFavoritActionPerformed
 
     private void btnExportCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportCSVActionPerformed
-        try (PrintWriter pw = new PrintWriter(new File("data_cuaca.csv"))) {
-        pw.println("Kota,Suhu,Kondisi");
-        for (int i = 0; i < tblData.getRowCount(); i++) {
-            pw.println(
-                tblData.getValueAt(i, 0) + "," +
-                tblData.getValueAt(i, 1) + "," +
-                tblData.getValueAt(i, 2)
-            );
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Pilih lokasi untuk menyimpan file CSV");
+
+    int pilihan = chooser.showSaveDialog(this);
+
+    if (pilihan == JFileChooser.APPROVE_OPTION) {
+
+        File file = chooser.getSelectedFile();
+
+        // Pastikan file berakhiran .csv
+        if (!file.getName().toLowerCase().endsWith(".csv")) {
+            file = new File(file.getAbsolutePath() + ".csv");
         }
-    } catch (Exception ex) {
-        ex.printStackTrace();
-    }        // TODO add your handling code here:
+
+        try (PrintWriter pw = new PrintWriter(file)) {
+
+            pw.println("Kota,Suhu,Kondisi");  // header CSV
+
+            for (int i = 0; i < tblData.getRowCount(); i++) {
+                pw.println(
+                        tblData.getValueAt(i, 0) + "," +
+                        tblData.getValueAt(i, 1) + "," +
+                        tblData.getValueAt(i, 2)
+                );
+            }
+
+            JOptionPane.showMessageDialog(this, 
+                    "Data berhasil diexport ke:\n" + file.getAbsolutePath());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                    "Gagal menyimpan file CSV!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     }//GEN-LAST:event_btnExportCSVActionPerformed
 
     private void btnLoadTersimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadTersimpanActionPerformed
-    DefaultTableModel model = (DefaultTableModel) tblData.getModel();
-    model.setRowCount(0);
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Pilih file CSV untuk di-import");
 
-    try (BufferedReader br = new BufferedReader(new FileReader("data_cuaca.csv"))) {
-        br.readLine(); // skip header
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] s = line.split(",");
-            model.addRow(new Object[]{s[0], s[1], s[2]});
+    int pilihan = chooser.showOpenDialog(this);
+
+    if (pilihan == JFileChooser.APPROVE_OPTION) {
+
+        File file = chooser.getSelectedFile();
+
+        // Pastikan file adalah CSV
+        if (!file.getName().toLowerCase().endsWith(".csv")) {
+            JOptionPane.showMessageDialog(this, 
+                    "File yang dipilih bukan file CSV!",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
         }
-    } catch (Exception ex) {
-        ex.printStackTrace();
-    }        // TODO add your handling code here:
+
+        DefaultTableModel model = (DefaultTableModel) tblData.getModel();
+        model.setRowCount(0); // hapus data lama
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+
+            String line;
+            br.readLine(); // skip header CSV
+
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+
+                if (data.length == 3) {
+                    model.addRow(new Object[]{
+                        data[0], // kota
+                        data[1], // suhu
+                        data[2]  // kondisi
+                    });
+                }
+            }
+
+            JOptionPane.showMessageDialog(this, 
+                    "Berhasil mengimpor data dari:\n" + file.getAbsolutePath());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Terjadi kesalahan saat membaca file!",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
     }//GEN-LAST:event_btnLoadTersimpanActionPerformed
 
     /**

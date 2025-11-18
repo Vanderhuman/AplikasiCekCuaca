@@ -143,6 +143,11 @@ public class FrmCekCuaca extends javax.swing.JFrame {
         btnKeluar.setBackground(new java.awt.Color(204, 0, 0));
         btnKeluar.setForeground(new java.awt.Color(255, 255, 255));
         btnKeluar.setText("Keluar");
+        btnKeluar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnKeluarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -342,6 +347,15 @@ public class FrmCekCuaca extends javax.swing.JFrame {
         }
     }
     }//GEN-LAST:event_btnLoadTersimpanActionPerformed
+
+    private void btnKeluarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKeluarActionPerformed
+        int confirm = JOptionPane.showConfirmDialog(this, 
+        "Yakin ingin keluar?", "Konfirmasi", 
+        JOptionPane.YES_NO_OPTION);
+    if (confirm == JOptionPane.YES_OPTION) {
+        System.exit(0);
+    }        // TODO add your handling code here:
+    }//GEN-LAST:event_btnKeluarActionPerformed
 
     /**
      * @param args the command line arguments
